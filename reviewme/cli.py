@@ -18,7 +18,11 @@ def run(scope, file):
     else:
         print ("👨🏻‍💻 Starting AI code review on {0}".format(scope, file))
 
-    ailinter.run(scope, file)
+    try:
+        ailinter.run(scope, file)
+    except Exception as e:
+        logging.error("❌Error running code review on {0}, error:".format(scope, e))
+        return
     print ("✅ Code review complete.")
 
 cli.add_command(run)

@@ -241,28 +241,31 @@ def run(scope, onlyReviewThisFile):
         # Submit the file review completion jobs to the executor
         futures = []
         for file_path in file_paths_changed:
-            if onlyReviewThisFile != "" and onlyReviewThisFile not in file_path:
-                continue
+            try:
+                if onlyReviewThisFile != "" and onlyReviewThisFile not in file_path:
+                    continue
 
-                # check that onlyThisFile is in the file path or else skip 
-            if onlyReviewThisFile != "" and onlyReviewThisFile not in file_path:
-                logging.debug(f"Skipping {file_path} because it does not match onlyReviewThisFile {onlyReviewThisFile}")
-                continue
+                    # check that onlyThisFile is in the file path or else skip 
+                if onlyReviewThisFile != "" and onlyReviewThisFile not in file_path:
+                    logging.debug(f"Skipping {file_path} because it does not match onlyReviewThisFile {onlyReviewThisFile}")
+                    continue
 
-            content = diffs[file_path]
-            print(f"\n== Checking {file_path} ==")
+                content = diffs[file_path]
+                print(f"\n== Checking {file_path} ==")
 
-            if content == "" or content == None:
-                print(f"Skipping {file_path} because it is empty")
-                continue
+                if content == "" or content == None:
+                    print(f"Skipping {file_path} because it is empty")
+                    continue
 
-            # Append imported local modules' code to the existing code
-            current_code_to_review = check_and_append_local_imports(content, file_paths)
-            full_file_content = read_file(file_path)
-            
-            import time
-            time.sleep(0.25)
-            futures.append(executor.submit(review_code, current_code_to_review, full_file_content))
+                # Append imported local modules' code to the existing code
+                current_code_to_review = check_and_append_local_imports(content, file_paths)
+                full_file_content = read_file(file_path)
+                
+                import time
+                time.sleep(0.25)
+                futures.append(executor.submit(review_code, current_code_to_review, full_file_content))
+            except Exception as e:
+                logging.error(f"Error while reviewing {file_path}: {e}, skipping this file")
 
         # Wait for all the jobs to complete
         for future in futures:
